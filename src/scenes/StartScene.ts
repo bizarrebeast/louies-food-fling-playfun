@@ -331,9 +331,9 @@ export class StartScene extends Phaser.Scene {
       { x: width * 0.88, y: height * 0.12, size: 52, key: 'taco', rotation: 10 },
       { x: width * 0.92, y: height * 0.35, size: 48, key: 'egg', rotation: -6 },
 
-      // Near Louie on terrain
-      { x: width * 0.22, y: height * 0.68, size: 45, key: 'pizza', rotation: 5 },
-      { x: width * 0.78, y: height * 0.70, size: 42, key: 'burger', rotation: -10 },
+      // Near Louie on terrain - positioned below Louie to avoid card overlap
+      { x: width * 0.22, y: height * 0.74, size: 45, key: 'pizza', rotation: 5 },
+      { x: width * 0.78, y: height * 0.76, size: 42, key: 'burger', rotation: -10 },
     ]
 
     foodItems.forEach((item, i) => {
@@ -431,7 +431,7 @@ export class StartScene extends Phaser.Scene {
     const s = GameSettings.uiScale
     const cardY = height * 0.48
     const cardW = Math.round(400 * s)
-    const cardH = Math.round(200 * s)
+    const cardH = Math.min(Math.round(200 * s), Math.round(height * 0.22))
     const borderWidth = 3 * s
 
     // Card background with transparency
@@ -447,38 +447,44 @@ export class StartScene extends Phaser.Scene {
     cardBg.lineStyle(borderWidth, 0x00D4FF, 1)
     cardBg.strokeRoundedRect(width / 2 - cardW / 2, cardY - cardH / 2, cardW, cardH, 16 * s)
 
+    // Distribute text evenly within the card
+    const innerH = cardH - 20 * s  // padding top/bottom
+    const lineSpacing = innerH / 5  // 5 lines: header + 4 steps
+
     // Instructions header
-    const instructions = this.add.text(width / 2, cardY - 68 * s, 'HOW TO PLAY', {
+    const instructions = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 0.5, 'HOW TO PLAY', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(24 * s)}px`,
+      fontSize: `${Math.round(Math.min(24 * s, cardH * 0.16))}px`,
       color: COLORS.blue
     })
     instructions.setOrigin(0.5)
 
-    const step1 = this.add.text(width / 2, cardY - 28 * s, 'Drag back & release to FLING!', {
+    const stepFontSize = Math.round(Math.min(18 * s, cardH * 0.12))
+
+    const step1 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 1.5, 'Drag back & release to FLING!', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: `${stepFontSize}px`,
       color: COLORS.white
     })
     step1.setOrigin(0.5)
 
-    const step2 = this.add.text(width / 2, cardY + 6 * s, 'Collect food for boosts & points', {
+    const step2 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 2.5, 'Collect food for boosts & points', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: `${stepFontSize}px`,
       color: COLORS.yellow
     })
     step2.setOrigin(0.5)
 
-    const step3 = this.add.text(width / 2, cardY + 40 * s, 'HOLD to dive down the hills', {
+    const step3 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 3.5, 'HOLD to dive down the hills', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: `${stepFontSize}px`,
       color: COLORS.pink
     })
     step3.setOrigin(0.5)
 
-    const step4 = this.add.text(width / 2, cardY + 72 * s, 'Build speed & launch off ramps!', {
+    const step4 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 4.5, 'Build speed & launch off ramps!', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(16 * s)}px`,
+      fontSize: `${Math.round(Math.min(16 * s, cardH * 0.11))}px`,
       color: COLORS.green
     })
     step4.setOrigin(0.5)
@@ -487,7 +493,7 @@ export class StartScene extends Phaser.Scene {
   private createPlayButton() {
     const { width, height } = this.cameras.main
     const s = GameSettings.uiScale
-    const buttonY = height * 0.92
+    const buttonY = height * 0.90
     const btnW = Math.round(280 * s)
     const btnH = Math.round(65 * s)
 

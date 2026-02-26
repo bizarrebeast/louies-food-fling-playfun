@@ -267,9 +267,9 @@ export class ResultsScene extends Phaser.Scene {
   private createScoreBreakdown() {
     const { width, height } = this.cameras.main
     const s = GameSettings.uiScale
-    const cardY = height * 0.45
+    const cardY = height * 0.44
     const cardW = Math.round(400 * s)
-    const cardH = Math.round(500 * s)
+    const cardH = Math.min(Math.round(500 * s), Math.round(height * 0.65))
     const borderWidth = 3 * s
 
     // Card background
@@ -287,7 +287,8 @@ export class ResultsScene extends Phaser.Scene {
 
     const padding = 35 * s
     const startY = cardY - cardH / 2 + padding
-    const lineHeight = 40 * s
+    // Derive line height dynamically: 9 data rows + divider + total row = ~11 units of space
+    const lineHeight = (cardH - padding * 2) / 11
 
     // Distance
     this.addStatRow('DISTANCE', `${this.results.distance}m`, startY, COLORS.blue)
@@ -387,9 +388,12 @@ export class ResultsScene extends Phaser.Scene {
   private createContinueButton() {
     const { width, height } = this.cameras.main
     const s = GameSettings.uiScale
-    const buttonY = height * 0.82
+    const cardY = height * 0.44
+    const cardH = Math.min(Math.round(500 * s), Math.round(height * 0.65))
     const btnW = Math.round(280 * s)
     const btnH = Math.round(70 * s)
+    // Position dynamically: just below the card with consistent gap, but never below 82%
+    const buttonY = Math.min(height * 0.82, cardY + cardH / 2 + btnH / 2 + 15 * s)
 
     const buttonBg = this.add.image(width / 2, buttonY, 'gradientBtnResults')
 
@@ -432,7 +436,7 @@ export class ResultsScene extends Phaser.Scene {
     const { width, height } = this.cameras.main
     const s = GameSettings.uiScale
 
-    const branding = this.add.text(width / 2, height - 30 * s, 'A BizarreBeasts ($BB) Game', {
+    const branding = this.add.text(width / 2, height - 15 * s, 'A BizarreBeasts ($BB) Game', {
       fontFamily: '"Joti One"',
       fontSize: `${Math.round(18 * s)}px`,
       color: COLORS.blue

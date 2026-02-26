@@ -97,6 +97,7 @@ export class GameScene extends Phaser.Scene {
   private ballStartX: number = 0
   private ballStartY: number = 0
   private sceneGroundY: number = WORLD.GROUND_Y
+  private terrainScale: number = 1
 
   // Camera
   private currentZoom: number = 1
@@ -162,6 +163,7 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.cameras.main
 
     this.sceneGroundY = height * GameSettings.groundYRatio
+    this.terrainScale = this.sceneGroundY / 900
     this.ballStartX = width / 2
     this.ballStartY = height * 0.35
 
@@ -218,11 +220,13 @@ export class GameScene extends Phaser.Scene {
 
   private getGroundY(x: number): number {
     // Layered sine waves for natural rolling hills
+    // Scale amplitudes by terrainScale so hills shrink with smaller viewports
     const baseY = this.sceneGroundY
-    const hill1 = Math.sin(x * 0.002) * 180  // Big rolling hills
-    const hill2 = Math.sin(x * 0.005) * 100  // Medium hills
-    const hill3 = Math.sin(x * 0.015) * 40   // Small bumps
-    const hill4 = Math.sin(x * 0.001) * 120  // Very large waves
+    const t = this.terrainScale
+    const hill1 = Math.sin(x * 0.002) * 180 * t  // Big rolling hills
+    const hill2 = Math.sin(x * 0.005) * 100 * t  // Medium hills
+    const hill3 = Math.sin(x * 0.015) * 40 * t   // Small bumps
+    const hill4 = Math.sin(x * 0.001) * 120 * t  // Very large waves
 
     return baseY - hill1 - hill2 - hill3 - hill4
   }
