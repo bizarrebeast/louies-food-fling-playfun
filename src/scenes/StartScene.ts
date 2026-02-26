@@ -405,21 +405,21 @@ export class StartScene extends Phaser.Scene {
     const louie = this.add.sprite(width / 2, height * 0.72, 'louie-idle')
     louie.setDisplaySize(louieSize, louieSize)
 
-    // Bounce animation on Louie
+    // Gentle idle bounce on Louie
     this.tweens.add({
       targets: louie,
-      y: louie.y - 30,
-      duration: 700,
+      y: louie.y - 10,
+      duration: 1200,
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1
     })
 
-    // Slight rotation wiggle
+    // Subtle rotation wiggle
     this.tweens.add({
       targets: louie,
-      angle: 10,
-      duration: 350,
+      angle: 4,
+      duration: 1400,
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1
