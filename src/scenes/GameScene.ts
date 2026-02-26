@@ -338,6 +338,35 @@ export class GameScene extends Phaser.Scene {
   private createBackgroundStars() {
     const starColors = [0xFFFFFF, 0xFFFFDD, 0xDDDDFF, 0xFFDDFF, 0xDDFFFF]
 
+    // Stars visible from ground level (-500 to -50)
+    for (let i = 0; i < 200; i++) {
+      const x = (i * 6271) % 100000
+      const y = -500 + (i * 2347) % 450  // -500 to -50
+      const size = 1 + (i % 2)  // 1-2 pixel stars (smaller for near sky)
+      const color = starColors[i % starColors.length]
+      const alpha = 0.2 + (i % 4) * 0.1  // 0.2 to 0.5 (dimmer for near sky)
+
+      this.backgroundGraphics.fillStyle(color, alpha)
+      this.backgroundGraphics.fillCircle(x, y, size)
+    }
+
+    // Stars in mid sky (-5000 to -500)
+    for (let i = 0; i < 300; i++) {
+      const x = (i * 8293) % 100000
+      const y = -5000 + (i * 4219) % 4500  // -5000 to -500
+      const size = 1 + (i % 3)  // 1-3 pixel stars
+      const color = starColors[i % starColors.length]
+      const alpha = 0.3 + (i % 5) * 0.12  // 0.3 to 0.78
+
+      this.backgroundGraphics.fillStyle(color, alpha)
+      this.backgroundGraphics.fillCircle(x, y, size)
+
+      if (i % 4 === 0) {
+        this.backgroundGraphics.fillStyle(color, alpha * 0.3)
+        this.backgroundGraphics.fillCircle(x, y, size + 2)
+      }
+    }
+
     // Scatter stars in upper atmosphere (-8000 to -5000)
     for (let i = 0; i < 500; i++) {
       // Use a simple pseudo-random based on index for consistent placement
@@ -359,6 +388,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createClouds() {
+    // Low clouds - visible from ground level during gameplay
+    for (let i = 0; i < 12; i++) {
+      const cloud = this.createNeonCloud(
+        Math.random() * 50000 - 2000,
+        -100 - Math.random() * 400,  // Low: -100 to -500 (visible in starting view)
+        0.15 + Math.random() * 0.25,
+        50 + Math.random() * 80  // Small-medium: 50-130
+      )
+      this.clouds.push(cloud)
+    }
+
+    // Near-sky clouds - visible during low flight
+    for (let i = 0; i < 20; i++) {
+      const cloud = this.createNeonCloud(
+        Math.random() * 50000 - 2000,
+        -500 - Math.random() * 1000,  // Near: -500 to -1500
+        0.15 + Math.random() * 0.3,
+        60 + Math.random() * 100  // Medium: 60-160
+      )
+      this.clouds.push(cloud)
+    }
+
     // Large clouds - high in sky
     for (let i = 0; i < 20; i++) {
       const cloud = this.createNeonCloud(
