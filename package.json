@@ -1,0 +1,18 @@
+{
+  "name": "louies-food-fling-playfun",
+  "version": "1.0.0",
+  "description": "Louie's Food Fling - Play.fun edition",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "author": "BizarreBeasts",
+  "license": "ISC",
+  "devDependencies": {
+    "cheerio": "^1.1.2",
+    "esbuild": "^0.20.2"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  }
+}
