@@ -1,5 +1,3 @@
-import GameSettings from '../config/GameSettings'
-
 // Cyberpunk color palette
 const COLORS = {
   pink: '#FF10F0',
@@ -39,8 +37,7 @@ export class StartScene extends Phaser.Scene {
   }
 
   private createGradientTextures() {
-    const s = GameSettings.uiScale
-    this.createGradientTexture('gradientBtn', Math.round(280 * s), Math.round(70 * s))
+    this.createGradientTexture('gradientBtn', 280, 70)
     // Title now uses yellow color, not gradient
   }
 
@@ -319,7 +316,6 @@ export class StartScene extends Phaser.Scene {
 
   private createFloatingFood() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
 
     // Organized food positions - balanced on both sides
     const foodItems = [
@@ -331,15 +327,14 @@ export class StartScene extends Phaser.Scene {
       { x: width * 0.88, y: height * 0.12, size: 52, key: 'taco', rotation: 10 },
       { x: width * 0.92, y: height * 0.35, size: 48, key: 'egg', rotation: -6 },
 
-      // Near Louie on terrain - positioned below Louie to avoid card overlap
-      { x: width * 0.22, y: height * 0.74, size: 45, key: 'pizza', rotation: 5 },
-      { x: width * 0.78, y: height * 0.76, size: 42, key: 'burger', rotation: -10 },
+      // Near Louie on terrain
+      { x: width * 0.22, y: height * 0.68, size: 45, key: 'pizza', rotation: 5 },
+      { x: width * 0.78, y: height * 0.70, size: 42, key: 'burger', rotation: -10 },
     ]
 
     foodItems.forEach((item, i) => {
       const food = this.add.sprite(item.x, item.y, item.key)
-      const scaledSize = Math.round(item.size * s)
-      food.setDisplaySize(scaledSize, scaledSize)
+      food.setDisplaySize(item.size, item.size)
       food.setAlpha(0.75)
       food.setAngle(item.rotation)
 
@@ -369,24 +364,23 @@ export class StartScene extends Phaser.Scene {
 
   private createTitle() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
 
     // Yellow title with black stroke - same yellow as Louie
     const titleMain = this.add.text(width / 2, height * 0.10, "LOUIE'S", {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(58 * s)}px`,
+      fontSize: '58px',
       color: '#FFDD00',
       stroke: '#000000',
-      strokeThickness: 8 * s
+      strokeThickness: 8
     })
     titleMain.setOrigin(0.5)
 
     const titleSub = this.add.text(width / 2, height * 0.17, 'FOOD FLING', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(52 * s)}px`,
+      fontSize: '52px',
       color: '#FFDD00',
       stroke: '#000000',
-      strokeThickness: 7 * s
+      strokeThickness: 7
     })
     titleSub.setOrigin(0.5)
 
@@ -401,25 +395,24 @@ export class StartScene extends Phaser.Scene {
     })
 
     // Louie character sprite on the terrain
-    const louieSize = Math.round(140 * s)
     const louie = this.add.sprite(width / 2, height * 0.72, 'louie-idle')
-    louie.setDisplaySize(louieSize, louieSize)
+    louie.setDisplaySize(140, 140)
 
-    // Gentle idle bounce on Louie
+    // Bounce animation on Louie
     this.tweens.add({
       targets: louie,
-      y: louie.y - 10,
-      duration: 1200,
+      y: louie.y - 30,
+      duration: 700,
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1
     })
 
-    // Subtle rotation wiggle
+    // Slight rotation wiggle
     this.tweens.add({
       targets: louie,
-      angle: 4,
-      duration: 1400,
+      angle: 10,
+      duration: 350,
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1
@@ -428,11 +421,10 @@ export class StartScene extends Phaser.Scene {
 
   private createInstructions() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
     const cardY = height * 0.48
-    const cardW = Math.round(400 * s)
-    const cardH = Math.min(Math.round(200 * s), Math.round(height * 0.22))
-    const borderWidth = 3 * s
+    const cardW = 400
+    const cardH = 200
+    const borderWidth = 3
 
     // Card background with transparency
     const cardBg = this.add.graphics()
@@ -442,49 +434,43 @@ export class StartScene extends Phaser.Scene {
       cardY - cardH / 2,
       cardW,
       cardH,
-      16 * s
+      16
     )
     cardBg.lineStyle(borderWidth, 0x00D4FF, 1)
-    cardBg.strokeRoundedRect(width / 2 - cardW / 2, cardY - cardH / 2, cardW, cardH, 16 * s)
-
-    // Distribute text evenly within the card
-    const innerH = cardH - 20 * s  // padding top/bottom
-    const lineSpacing = innerH / 5  // 5 lines: header + 4 steps
+    cardBg.strokeRoundedRect(width / 2 - cardW / 2, cardY - cardH / 2, cardW, cardH, 16)
 
     // Instructions header
-    const instructions = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 0.5, 'HOW TO PLAY', {
+    const instructions = this.add.text(width / 2, cardY - 68, 'HOW TO PLAY', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(Math.min(24 * s, cardH * 0.16))}px`,
+      fontSize: '24px',
       color: COLORS.blue
     })
     instructions.setOrigin(0.5)
 
-    const stepFontSize = Math.round(Math.min(18 * s, cardH * 0.12))
-
-    const step1 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 1.5, 'Drag back & release to FLING!', {
+    const step1 = this.add.text(width / 2, cardY - 28, 'Drag back & release to FLING!', {
       fontFamily: '"Slackey"',
-      fontSize: `${stepFontSize}px`,
+      fontSize: '18px',
       color: COLORS.white
     })
     step1.setOrigin(0.5)
 
-    const step2 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 2.5, 'Collect food for boosts & points', {
+    const step2 = this.add.text(width / 2, cardY + 6, 'Collect food for boosts & points', {
       fontFamily: '"Slackey"',
-      fontSize: `${stepFontSize}px`,
+      fontSize: '18px',
       color: COLORS.yellow
     })
     step2.setOrigin(0.5)
 
-    const step3 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 3.5, 'HOLD to dive down the hills', {
+    const step3 = this.add.text(width / 2, cardY + 40, 'HOLD to dive down the hills', {
       fontFamily: '"Slackey"',
-      fontSize: `${stepFontSize}px`,
+      fontSize: '18px',
       color: COLORS.pink
     })
     step3.setOrigin(0.5)
 
-    const step4 = this.add.text(width / 2, cardY - innerH / 2 + lineSpacing * 4.5, 'Build speed & launch off ramps!', {
+    const step4 = this.add.text(width / 2, cardY + 72, 'Build speed & launch off ramps!', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(Math.min(16 * s, cardH * 0.11))}px`,
+      fontSize: '16px',
       color: COLORS.green
     })
     step4.setOrigin(0.5)
@@ -492,21 +478,20 @@ export class StartScene extends Phaser.Scene {
 
   private createPlayButton() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
-    const buttonY = height * 0.90
-    const btnW = Math.round(280 * s)
-    const btnH = Math.round(65 * s)
+    const buttonY = height * 0.92
+    const btnW = 280
+    const btnH = 65
 
     const buttonBg = this.add.image(width / 2, buttonY, 'gradientBtn')
 
     const maskGraphics = this.make.graphics({ add: false })
     maskGraphics.fillStyle(0xffffff)
-    maskGraphics.fillRoundedRect(width / 2 - btnW / 2, buttonY - btnH / 2, btnW, btnH, 20 * s)
+    maskGraphics.fillRoundedRect(width / 2 - btnW / 2, buttonY - btnH / 2, btnW, btnH, 20)
     buttonBg.setMask(maskGraphics.createGeometryMask())
 
     const buttonText = this.add.text(width / 2, buttonY, 'FLING!', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(40 * s)}px`,
+      fontSize: '40px',
       color: '#0a0a0a'
     })
     buttonText.setOrigin(0.5)
@@ -529,11 +514,10 @@ export class StartScene extends Phaser.Scene {
 
   private createBranding() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
 
-    const branding = this.add.text(width / 2, height - 20 * s, 'A BizarreBeasts ($BB) Game', {
+    const branding = this.add.text(width / 2, height - 20, 'A BizarreBeasts ($BB) Game', {
       fontFamily: '"Joti One"',
-      fontSize: `${Math.round(16 * s)}px`,
+      fontSize: '16px',
       color: COLORS.blue
     })
     branding.setOrigin(0.5)

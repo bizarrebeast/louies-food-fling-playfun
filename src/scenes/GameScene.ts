@@ -7,7 +7,6 @@ import {
   getAngleFromDrag,
   TossResult
 } from '../data/BallTossLogic'
-import GameSettings from '../config/GameSettings'
 
 const COLORS = {
   pink: 0xFF10F0,
@@ -96,8 +95,6 @@ export class GameScene extends Phaser.Scene {
   // World
   private ballStartX: number = 0
   private ballStartY: number = 0
-  private sceneGroundY: number = WORLD.GROUND_Y
-  private terrainScale: number = 1
 
   // Camera
   private currentZoom: number = 1
@@ -162,8 +159,6 @@ export class GameScene extends Phaser.Scene {
   create() {
     const { width, height } = this.cameras.main
 
-    this.sceneGroundY = height * GameSettings.groundYRatio
-    this.terrainScale = this.sceneGroundY / 900
     this.ballStartX = width / 2
     this.ballStartY = height * 0.35
 
@@ -220,13 +215,11 @@ export class GameScene extends Phaser.Scene {
 
   private getGroundY(x: number): number {
     // Layered sine waves for natural rolling hills
-    // Scale amplitudes by terrainScale so hills shrink with smaller viewports
-    const baseY = this.sceneGroundY
-    const t = this.terrainScale
-    const hill1 = Math.sin(x * 0.002) * 180 * t  // Big rolling hills
-    const hill2 = Math.sin(x * 0.005) * 100 * t  // Medium hills
-    const hill3 = Math.sin(x * 0.015) * 40 * t   // Small bumps
-    const hill4 = Math.sin(x * 0.001) * 120 * t  // Very large waves
+    const baseY = WORLD.GROUND_Y
+    const hill1 = Math.sin(x * 0.002) * 180  // Big rolling hills
+    const hill2 = Math.sin(x * 0.005) * 100  // Medium hills
+    const hill3 = Math.sin(x * 0.015) * 40   // Small bumps
+    const hill4 = Math.sin(x * 0.001) * 120  // Very large waves
 
     return baseY - hill1 - hill2 - hill3 - hill4
   }
@@ -246,13 +239,13 @@ export class GameScene extends Phaser.Scene {
     // Ground fill - dark green (extend far down to cover parallax)
     this.terrainGraphics.fillStyle(0x0a1a0a, 1)
     this.terrainGraphics.beginPath()
-    this.terrainGraphics.moveTo(startX, this.sceneGroundY + 3000)
+    this.terrainGraphics.moveTo(startX, WORLD.GROUND_Y + 3000)
 
     for (let x = startX; x <= endX; x += 15) {
       this.terrainGraphics.lineTo(x, this.getGroundY(x))
     }
 
-    this.terrainGraphics.lineTo(endX, this.sceneGroundY + 3000)
+    this.terrainGraphics.lineTo(endX, WORLD.GROUND_Y + 3000)
     this.terrainGraphics.closePath()
     this.terrainGraphics.fill()
 
@@ -280,9 +273,9 @@ export class GameScene extends Phaser.Scene {
       const markerX = this.ballStartX + d
       if (markerX > startX && markerX < endX) {
         const markerY = this.getGroundY(markerX)
-        const marker = this.add.text(markerX, markerY + 40 * GameSettings.uiScale, `${d}m`, {
+        const marker = this.add.text(markerX, markerY + 40, `${d}m`, {
           fontFamily: '"Joti One"',
-          fontSize: `${Math.round(14 * GameSettings.uiScale)}px`,
+          fontSize: '14px',
           color: '#39FF14'
         })
         marker.setOrigin(0.5)
@@ -338,35 +331,6 @@ export class GameScene extends Phaser.Scene {
   private createBackgroundStars() {
     const starColors = [0xFFFFFF, 0xFFFFDD, 0xDDDDFF, 0xFFDDFF, 0xDDFFFF]
 
-    // Stars visible from ground level (-500 to -50)
-    for (let i = 0; i < 200; i++) {
-      const x = (i * 6271) % 100000
-      const y = -500 + (i * 2347) % 450  // -500 to -50
-      const size = 1 + (i % 2)  // 1-2 pixel stars (smaller for near sky)
-      const color = starColors[i % starColors.length]
-      const alpha = 0.2 + (i % 4) * 0.1  // 0.2 to 0.5 (dimmer for near sky)
-
-      this.backgroundGraphics.fillStyle(color, alpha)
-      this.backgroundGraphics.fillCircle(x, y, size)
-    }
-
-    // Stars in mid sky (-5000 to -500)
-    for (let i = 0; i < 300; i++) {
-      const x = (i * 8293) % 100000
-      const y = -5000 + (i * 4219) % 4500  // -5000 to -500
-      const size = 1 + (i % 3)  // 1-3 pixel stars
-      const color = starColors[i % starColors.length]
-      const alpha = 0.3 + (i % 5) * 0.12  // 0.3 to 0.78
-
-      this.backgroundGraphics.fillStyle(color, alpha)
-      this.backgroundGraphics.fillCircle(x, y, size)
-
-      if (i % 4 === 0) {
-        this.backgroundGraphics.fillStyle(color, alpha * 0.3)
-        this.backgroundGraphics.fillCircle(x, y, size + 2)
-      }
-    }
-
     // Scatter stars in upper atmosphere (-8000 to -5000)
     for (let i = 0; i < 500; i++) {
       // Use a simple pseudo-random based on index for consistent placement
@@ -388,28 +352,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createClouds() {
-    // Low clouds - visible from ground level during gameplay
-    for (let i = 0; i < 12; i++) {
-      const cloud = this.createNeonCloud(
-        Math.random() * 50000 - 2000,
-        -100 - Math.random() * 400,  // Low: -100 to -500 (visible in starting view)
-        0.15 + Math.random() * 0.25,
-        50 + Math.random() * 80  // Small-medium: 50-130
-      )
-      this.clouds.push(cloud)
-    }
-
-    // Near-sky clouds - visible during low flight
-    for (let i = 0; i < 20; i++) {
-      const cloud = this.createNeonCloud(
-        Math.random() * 50000 - 2000,
-        -500 - Math.random() * 1000,  // Near: -500 to -1500
-        0.15 + Math.random() * 0.3,
-        60 + Math.random() * 100  // Medium: 60-160
-      )
-      this.clouds.push(cloud)
-    }
-
     // Large clouds - high in sky
     for (let i = 0; i < 20; i++) {
       const cloud = this.createNeonCloud(
@@ -719,29 +661,28 @@ export class GameScene extends Phaser.Scene {
 
   private createHUD() {
     const { width } = this.cameras.main
-    const s = GameSettings.uiScale
 
-    this.distanceText = this.add.text(width / 2, 40 * s, '0m', {
+    this.distanceText = this.add.text(width / 2, 40, '0m', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(42 * s)}px`,
+      fontSize: '42px',
       color: '#00D4FF',
       stroke: '#000000',
-      strokeThickness: 4 * s
+      strokeThickness: 4
     })
     this.distanceText.setOrigin(0.5)
 
-    this.starsText = this.add.text(width / 2, 88 * s, 'Burgers: 0', {
+    this.starsText = this.add.text(width / 2, 88, 'Burgers: 0', {
       fontFamily: '"Inter"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: '18px',
       fontStyle: 'bold',
       color: '#FFE135'
     })
     this.starsText.setOrigin(0.5)
 
     // Surf hint (hidden initially)
-    this.surfHint = this.add.text(width / 2, 120 * s, 'HOLD TO DIVE!', {
+    this.surfHint = this.add.text(width / 2, 120, 'HOLD TO DIVE!', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(22 * s)}px`,
+      fontSize: '22px',
       color: '#39FF14'
     })
     this.surfHint.setOrigin(0.5)
@@ -750,9 +691,9 @@ export class GameScene extends Phaser.Scene {
     // Make HUD elements only visible on UI camera, not main camera
     this.cameras.main.ignore([this.distanceText, this.starsText, this.surfHint])
 
-    this.instructionText = this.add.text(width / 2, this.ballStartY + 80 * s, 'DRAG & RELEASE TO TOSS', {
+    this.instructionText = this.add.text(width / 2, this.ballStartY + 80, 'DRAG & RELEASE TO TOSS', {
       fontFamily: '"Joti One"',
-      fontSize: `${Math.round(22 * s)}px`,
+      fontSize: '22px',
       color: '#39FF14'
     })
     this.instructionText.setOrigin(0.5)
@@ -813,7 +754,7 @@ export class GameScene extends Phaser.Scene {
       }
 
       // Launch!
-      const maxDrag = 150 * GameSettings.uiScale
+      const maxDrag = 150
       const power = getPowerFromDrag(dragDistance, maxDrag)
       let angle = getAngleFromDrag(centerX, centerY, pointer.x, pointer.y)
 
@@ -847,28 +788,25 @@ export class GameScene extends Phaser.Scene {
 
   private drawPullMeterBg() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
     const centerX = width / 2
     const centerY = height * 0.35
-    const meterRadius = 70 * s
 
     this.pullMeterBg.clear()
-    this.pullMeterBg.lineStyle(14 * s, 0x1a1a2a, 0.9)
-    this.pullMeterBg.strokeCircle(centerX, centerY, meterRadius)
-    this.pullMeterBg.lineStyle(2 * s, COLORS.blue, 0.5)
-    this.pullMeterBg.strokeCircle(centerX, centerY, meterRadius)
+    this.pullMeterBg.lineStyle(14, 0x1a1a2a, 0.9)
+    this.pullMeterBg.strokeCircle(centerX, centerY, 70)
+    this.pullMeterBg.lineStyle(2, COLORS.blue, 0.5)
+    this.pullMeterBg.strokeCircle(centerX, centerY, 70)
   }
 
   private updateAiming(pointer: Phaser.Input.Pointer) {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
     const centerX = width / 2
     const centerY = height * 0.35
 
     const dx = centerX - pointer.x
     const dy = centerY - pointer.y
     const dragDistance = Math.sqrt(dx * dx + dy * dy)
-    const maxDrag = 150 * s
+    const maxDrag = 150
     const powerPercent = Math.min(dragDistance / maxDrag, 1)
 
     this.pullMeter.clear()
@@ -876,11 +814,11 @@ export class GameScene extends Phaser.Scene {
     if (powerPercent > 0.7) meterColor = 0xFF4444
     else if (powerPercent > 0.4) meterColor = COLORS.yellow
 
-    this.pullMeter.lineStyle(12 * s, meterColor, 1)
+    this.pullMeter.lineStyle(12, meterColor, 1)
     const startAngle = -Math.PI / 2
     const endAngle = startAngle + (Math.PI * 2 * powerPercent)
     this.pullMeter.beginPath()
-    this.pullMeter.arc(centerX, centerY, 70 * s, startAngle, endAngle, false)
+    this.pullMeter.arc(centerX, centerY, 70, startAngle, endAngle, false)
     this.pullMeter.strokePath()
 
     this.aimLine.clear()
@@ -1068,13 +1006,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showLaunchEffect() {
-    const s = GameSettings.uiScale
     const popup = this.add.text(this.ball.x, this.ball.y - 50, 'LAUNCH!', {
       fontFamily: '"Joti One"',
-      fontSize: `${Math.round(32 * s)}px`,
+      fontSize: '32px',
       color: '#39FF14',
       stroke: '#000000',
-      strokeThickness: 3 * s
+      strokeThickness: 3
     })
     popup.setOrigin(0.5)
     // UI camera ignores game world popups
@@ -1208,7 +1145,7 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.cameras.main
 
     const targetX = this.ball.x - width / 2
-    const targetY = Math.min(this.ball.y - height / 2, this.getGroundY(this.ball.x) - height + 150 * GameSettings.uiScale)
+    const targetY = Math.min(this.ball.y - height / 2, this.getGroundY(this.ball.x) - height + 150)
 
     // Frame-rate independent camera smoothing
     const lerpX = 1 - Math.pow(0.00001, dt)  // ~0.1 at 60fps

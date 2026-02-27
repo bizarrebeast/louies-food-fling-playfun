@@ -1,6 +1,5 @@
 import { TossResult } from '../data/BallTossLogic'
 import { reportGameOver } from '../utils/RemixUtils'
-import GameSettings from '../config/GameSettings'
 
 const COLORS = {
   pink: '#FF10F0',
@@ -29,25 +28,21 @@ export class ResultsScene extends Phaser.Scene {
   }
 
   preload() {
-    const s = GameSettings.uiScale
-    const texW = Math.round(280 * s)
-    const texH = Math.round(70 * s)
-
     if (this.textures.exists('gradientBtnResults')) {
       this.textures.remove('gradientBtnResults')
     }
 
     const canvas = document.createElement('canvas')
-    canvas.width = texW
-    canvas.height = texH
+    canvas.width = 280
+    canvas.height = 70
     const ctx = canvas.getContext('2d')!
 
-    const gradient = ctx.createLinearGradient(0, 0, texW, 0)
+    const gradient = ctx.createLinearGradient(0, 0, 280, 0)
     gradient.addColorStop(0, COLORS.pink)
     gradient.addColorStop(1, COLORS.blue)
 
     ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, texW, texH)
+    ctx.fillRect(0, 0, 280, 70)
 
     this.textures.addCanvas('gradientBtnResults', canvas)
   }
@@ -252,43 +247,39 @@ export class ResultsScene extends Phaser.Scene {
 
   private createTitle() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
 
     const title = this.add.text(width / 2, height * 0.06, 'RESULTS', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(42 * s)}px`,
+      fontSize: '42px',
       color: COLORS.blue,
       stroke: '#000000',
-      strokeThickness: 4 * s
+      strokeThickness: 4
     })
     title.setOrigin(0.5)
   }
 
   private createScoreBreakdown() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
-    const cardY = height * 0.44
-    const cardW = Math.round(400 * s)
-    const cardH = Math.min(Math.round(500 * s), Math.round(height * 0.65))
-    const borderWidth = 3 * s
+    const cardY = height * 0.45
+    const cardW = 400
+    const cardH = 500
+    const borderWidth = 3
 
     // Card background
     const cardBg = this.add.graphics()
     cardBg.lineStyle(borderWidth, 0x00D4FF, 1)
-    cardBg.strokeRoundedRect(width / 2 - cardW / 2, cardY - cardH / 2, cardW, cardH, 16 * s)
+    cardBg.strokeRoundedRect(width / 2 - cardW / 2, cardY - cardH / 2, cardW, cardH, 16)
     cardBg.fillStyle(0x1a1a2a, 1)
     cardBg.fillRoundedRect(
       width / 2 - cardW / 2 + borderWidth,
       cardY - cardH / 2 + borderWidth,
       cardW - borderWidth * 2,
       cardH - borderWidth * 2,
-      14 * s
+      14
     )
 
-    const padding = 35 * s
-    const startY = cardY - cardH / 2 + padding
-    // Derive line height dynamically: 9 data rows + divider + total row = ~11 units of space
-    const lineHeight = (cardH - padding * 2) / 11
+    const startY = cardY - cardH / 2 + 35
+    const lineHeight = 40
 
     // Distance
     this.addStatRow('DISTANCE', `${this.results.distance}m`, startY, COLORS.blue)
@@ -318,27 +309,27 @@ export class ResultsScene extends Phaser.Scene {
     this.addStatRow('POPCORN', `${this.results.popcornCollected}`, startY + lineHeight * 8, COLORS.white, '150 ea')
 
     // Divider
-    const dividerY = startY + lineHeight * 9 + 5 * s
+    const dividerY = startY + lineHeight * 9 + 5
     const divider = this.add.graphics()
-    divider.lineStyle(2 * s, 0x3a3a4a, 1)
-    divider.moveTo(width / 2 - cardW / 2 + 30 * s, dividerY)
-    divider.lineTo(width / 2 + cardW / 2 - 30 * s, dividerY)
+    divider.lineStyle(2, 0x3a3a4a, 1)
+    divider.moveTo(width / 2 - cardW / 2 + 30, dividerY)
+    divider.lineTo(width / 2 + cardW / 2 - 30, dividerY)
     divider.strokePath()
 
     // Total score
-    const totalLabel = this.add.text(width / 2 - cardW / 2 + padding, dividerY + 28 * s, 'TOTAL', {
+    const totalLabel = this.add.text(width / 2 - cardW / 2 + 35, dividerY + 28, 'TOTAL', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(28 * s)}px`,
+      fontSize: '28px',
       color: COLORS.blue
     })
     totalLabel.setOrigin(0, 0.5)
 
-    const totalValue = this.add.text(width / 2 + cardW / 2 - padding, dividerY + 28 * s, '0', {
+    const totalValue = this.add.text(width / 2 + cardW / 2 - 35, dividerY + 28, '0', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(34 * s)}px`,
+      fontSize: '34px',
       color: COLORS.pink,
       stroke: '#000000',
-      strokeThickness: 3 * s
+      strokeThickness: 3
     })
     totalValue.setOrigin(1, 0.5)
 
@@ -356,29 +347,27 @@ export class ResultsScene extends Phaser.Scene {
 
   private addStatRow(label: string, value: string, y: number, valueColor: string, subtext?: string) {
     const { width } = this.cameras.main
-    const s = GameSettings.uiScale
-    const cardW = Math.round(400 * s)
-    const padding = 35 * s
+    const cardW = 400
 
-    const labelText = this.add.text(width / 2 - cardW / 2 + padding, y, label, {
+    const labelText = this.add.text(width / 2 - cardW / 2 + 35, y, label, {
       fontFamily: '"Inter"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: '18px',
       fontStyle: 'bold',
       color: '#888888'
     })
     labelText.setOrigin(0, 0.5)
 
-    const valueText = this.add.text(width / 2 + cardW / 2 - padding, y, value, {
+    const valueText = this.add.text(width / 2 + cardW / 2 - 35, y, value, {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(26 * s)}px`,
+      fontSize: '26px',
       color: valueColor
     })
     valueText.setOrigin(1, 0.5)
 
     if (subtext) {
-      const subtextObj = this.add.text(width / 2 + cardW / 2 - padding - valueText.width - 12 * s, y, subtext, {
+      const subtextObj = this.add.text(width / 2 + cardW / 2 - 35 - valueText.width - 12, y, subtext, {
         fontFamily: '"Inter"',
-        fontSize: `${Math.round(14 * s)}px`,
+        fontSize: '14px',
         color: '#555555'
       })
       subtextObj.setOrigin(1, 0.5)
@@ -387,24 +376,20 @@ export class ResultsScene extends Phaser.Scene {
 
   private createContinueButton() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
-    const cardY = height * 0.44
-    const cardH = Math.min(Math.round(500 * s), Math.round(height * 0.65))
-    const btnW = Math.round(280 * s)
-    const btnH = Math.round(70 * s)
-    // Position dynamically: just below the card with consistent gap, but never below 82%
-    const buttonY = Math.min(height * 0.82, cardY + cardH / 2 + btnH / 2 + 15 * s)
+    const buttonY = height * 0.82
+    const btnW = 280
+    const btnH = 70
 
     const buttonBg = this.add.image(width / 2, buttonY, 'gradientBtnResults')
 
     const maskGraphics = this.make.graphics({ add: false })
     maskGraphics.fillStyle(0xffffff)
-    maskGraphics.fillRoundedRect(width / 2 - btnW / 2, buttonY - btnH / 2, btnW, btnH, 20 * s)
+    maskGraphics.fillRoundedRect(width / 2 - btnW / 2, buttonY - btnH / 2, btnW, btnH, 20)
     buttonBg.setMask(maskGraphics.createGeometryMask())
 
     const buttonText = this.add.text(width / 2, buttonY, 'CONTINUE', {
       fontFamily: '"Slackey"',
-      fontSize: `${Math.round(32 * s)}px`,
+      fontSize: '32px',
       color: '#0a0a0a'
     })
     buttonText.setOrigin(0.5)
@@ -434,11 +419,10 @@ export class ResultsScene extends Phaser.Scene {
 
   private createBranding() {
     const { width, height } = this.cameras.main
-    const s = GameSettings.uiScale
 
-    const branding = this.add.text(width / 2, height - 15 * s, 'A BizarreBeasts ($BB) Game', {
+    const branding = this.add.text(width / 2, height - 30, 'A BizarreBeasts ($BB) Game', {
       fontFamily: '"Joti One"',
-      fontSize: `${Math.round(18 * s)}px`,
+      fontSize: '18px',
       color: COLORS.blue
     })
     branding.setOrigin(0.5)
